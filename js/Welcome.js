@@ -6,9 +6,11 @@ class Welcome {
 
     this.teacherButton = createButton("Teacher");
     this.studentButton = createButton("Student");
+    this.isDisplayed = false;
   }
 
   hideElements() {
+    this.logo.hide();
     this.teacherButton.hide();
     this.studentButton.hide();
   }
@@ -37,8 +39,15 @@ class Welcome {
   }
 
   display() {
+    if (this.isDisplayed) {
+      return;
+    }
+    this.logo.show();
+    this.teacherButton.show();
+    this.studentButton.show();
     this.setElementStyle();
     this.setElementPosition();
     this.handleOnpress();
+    this.isDisplayed = true;
   }
 }

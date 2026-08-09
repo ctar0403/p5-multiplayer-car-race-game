@@ -19,6 +19,18 @@ class Player {
     });
   }
 
+  async join() {
+    var playerCountRef = db.ref(`users/${secret_word}/player_count/`);
+    var result = await playerCountRef.transaction((count) => {
+      return (count || 0) + 1;
+    });
+
+    playerCount = result.snapshot.val();
+    this.index = playerCount;
+    this.update();
+    return this.index;
+  }
+
   update() {
     var playerIndex = "players/player" + this.index;
     db.ref(`users/${secret_word}/${playerIndex}`).set({

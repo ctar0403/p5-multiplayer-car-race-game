@@ -9,11 +9,23 @@ class Teacher {
     this.greeting2 = createElement("h3");
 
     this.playButton = createButton("Play");
+    this.isDisplayed = false;
+    this.generateSecretWord.hide();
+    this.message.hide();
+    this.secretWord.hide();
+    this.nameInput.hide();
+    this.greeting.hide();
+    this.greeting2.hide();
+    this.playButton.hide();
   }
 
   hideElements() {
+    this.generateSecretWord.hide();
     this.message.hide();
+    this.secretWord.hide();
     this.nameInput.hide();
+    this.greeting.hide();
+    this.greeting2.hide();
     this.playButton.hide();
   }
 
@@ -88,31 +100,44 @@ class Teacher {
       this.getToken(secret_word);
       this.message.html("Send your secret word to student !");
       this.secretWord.html(`Secret Word = ${secret_word}`);
+      this.message.show();
+      this.secretWord.show();
+      this.nameInput.show();
+      this.playButton.show();
 
       this.nameInput.position(width / 2.3, height / 2 - 120);
       this.playButton.position(width / 2.3, height / 2 - 60);
     });
 
-    this.playButton.mousePressed(() => {
+    this.playButton.mousePressed(async () => {
+      if (this.nameInput.value() === "" || !secret_word) {
+        return;
+      }
+
       this.hideElements();
       player.name = this.nameInput.value();
-      playerCount += 1;
-      player.index = playerCount;
-      player.update();
-      player.updateCount(playerCount);
+      await player.join();
       this.greeting.html("Hello " + player.name);
+      this.greeting.show();
       this.greeting.position(width / 2 - 70, height / 4);
 
       this.greeting2.html("Waiting for other players to join ....");
+      this.greeting2.show();
       this.greeting2.position(width / 2.5, height / 3.2);
 
+      this.secretWord.show();
       this.secretWord.position(width / 2.3, height / 2.5);
     });
   }
 
   display() {
+    if (this.isDisplayed) {
+      return;
+    }
+    this.generateSecretWord.show();
     this.setElementStyle();
     this.setElementPosition();
     this.handleOnpress();
+    this.isDisplayed = true;
   }
 }

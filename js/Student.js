@@ -10,11 +10,22 @@ class Student {
     this.greeting2 = createElement("h3");
     this.submitButton = createButton("Submit");
     this.playButton = createButton("Play");
+    this.isDisplayed = false;
+    this.secretWordInput.hide();
+    this.nameInput.hide();
+    this.greeting.hide();
+    this.greeting2.hide();
+    this.submitButton.hide();
+    this.playButton.hide();
   }
 
   hideElements() {
     this.secretWordInput.hide();
+    this.nameInput.hide();
+    this.greeting.hide();
+    this.greeting2.hide();
     this.submitButton.hide();
+    this.playButton.hide();
   }
 
   setElementPosition() {
@@ -30,7 +41,7 @@ class Student {
   }
 
   getToken(word) {
-    var url = `https://us-central1-trail-car-racing-game.cloudfunctions.net/genrateToken?secret_word=${word}`;
+    var url = `https://us-central1-trial-car-racing-game.cloudfunctions.net/genrateToken?secret_word=${word}`;
     httpGet(url, "json", false, (response) => {
       if (response.success) {
         this.login(response.token, word);
@@ -46,46 +57,62 @@ class Student {
   }
 
   login(token, secret_word) {
-    fireAuth.signInWithCustomToken(token).catch(function (error) {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      // TODO: Add Swal Pop up
-    });
+    fireAuth
+      .signInWithCustomToken(token)
+      .then(() => {
+        game.getState(secret_word);
+      })
+      .catch(function (error) {
+        var errorMessage = error.message;
+        swal({
+          title: `Unsuccessfull Login`,
+          text: `${errorMessage}`,
+          type: "error",
+          confirmButtonText: "Ok",
+        });
+      });
   }
 
   handleOnpress() {
     this.submitButton.mousePressed(async () => {
       if (this.secretWordInput.value() !== "") {
-        this.hideElements();
+        this.secretWordInput.hide();
+        this.submitButton.hide();
         secret_word = this.secretWordInput.value();
-        game.getState(secret_word);
         this.getToken(secret_word);
+        this.nameInput.show();
+        this.playButton.show();
         this.nameInput.position(width / 2.3, height / 2 - 120);
         this.playButton.position(width / 2.3, height / 2 - 60);
       }
     });
 
-    this.playButton.mousePressed(() => {
+    this.playButton.mousePressed(async () => {
       if (this.nameInput.value() !== "") {
         this.nameInput.hide();
         this.playButton.hide();
         player.name = this.nameInput.value();
-        playerCount += 1;
-        player.index = playerCount;
-        player.update();
-        player.updateCount(playerCount);
+        await player.join();
         this.greeting.html("Hello " + player.name);
+        this.greeting.show();
         this.greeting.position(width / 2 - 70, height / 4);
 
         this.greeting2.html("Waiting for other players to join ....");
+        this.greeting2.show();
         this.greeting2.position(width / 3, height / 3.2);
       }
     });
   }
 
   display() {
+    if (this.isDisplayed) {
+      return;
+    }
+    this.secretWordInput.show();
+    this.submitButton.show();
     this.setElementStyle();
     this.setElementPosition();
     this.handleOnpress();
+    this.isDisplayed = true;
   }
 }

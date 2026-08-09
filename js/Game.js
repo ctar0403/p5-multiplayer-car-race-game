@@ -1,4 +1,10 @@
 class Game {
+  constructor() {
+    this.isPlaying = false;
+    this.hasFinished = false;
+    this.isWatchingPlayerCount = false;
+  }
+
   getState(secret_word) {
     var gameStateRef = db.ref(`users/${secret_word}/game_state/`);
     gameStateRef.on("value", function (data) {
@@ -19,7 +25,8 @@ class Game {
     }
 
     // //When user loged in successfully
-    if (gameState === 0) {
+    if (gameState === 0 && !this.isWatchingPlayerCount) {
+      this.isWatchingPlayerCount = true;
       var playerCountRef = await db
         .ref(`users/${secret_word}/player_count/`)
         .once("value");
@@ -32,8 +39,11 @@ class Game {
   }
 
   play() {
-    Player.getPlayerInfo();
-    player.getCarsAtEnd();
+    if (!this.isPlaying) {
+      Player.getPlayerInfo();
+      player.getCarsAtEnd();
+      this.isPlaying = true;
+    }
 
     if (allPlayers !== undefined) {
       background("#464646");
@@ -56,6 +66,9 @@ class Game {
         x = x + 455;
         //use data form the database to display the cars in y direction
         y = height - allPlayers[plr].distance;
+        if (!cars[index - 1]) {
+          continue;
+        }
         cars[index - 1].x = x;
         cars[index - 1].y = y;
 
@@ -75,10 +88,12 @@ class Game {
       player.update();
     }
 
-    if (player.distance > height * 5 - 100) {
+    if (!this.hasFinished && player.distance > height * 5 - 100) {
+      this.hasFinished = true;
       gameState = 2;
       player.rank += 1;
       Player.updateCarsAtEnd(player.rank);
+      game.update(2);
       swal({
         title: `Awesome!${"\n"}Rank${"\n"}${player.rank}`,
         text: "You reached the finish line successfully",

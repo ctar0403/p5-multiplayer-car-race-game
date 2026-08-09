@@ -4,6 +4,7 @@ var fireAuth, db;
 var game, welcome, teacher, student;
 var secret_word;
 var player, allPlayers;
+var car1, car2, cars;
 var gameState = null;
 var playerCount;
 function preload() {
@@ -36,7 +37,7 @@ function draw() {
   if (gameState === null || gameState === 0) {
     game.start();
   }
-  if (playerCount === 2) {
+  if (gameState === 0 && playerCount === 2) {
     game.update(1);
   }
 
